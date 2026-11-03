@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0](https://github.com/roquerodrigo/home-assistant-autopilot/compare/v1.0.2...v2.0.0) (2026-11-03)
+
+### Breaking changes
+
+- The reusable validation workflow is removed. Replace the job that calls it with a job that checks out the repository and runs the action as a step, as the README shows. ([#8](https://github.com/roquerodrigo/home-assistant-autopilot/pull/8))
+
 ## [1.0.2](https://github.com/roquerodrigo/home-assistant-autopilot/compare/v1.0.1...v1.0.2) (2026-11-03)
 
 This release fixes a publishing problem that made earlier releases unusable for every workflow that uses the action.
