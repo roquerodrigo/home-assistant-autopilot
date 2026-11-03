@@ -2,10 +2,10 @@
 
 GitHub Action, command line and npm package that validates Home Assistant Marketplace
 repositories and attaches their release asset. `README.md` is the public contract:
-inputs, outputs, checks and assets. Consumers track `@v1` or `@latest`, which
-`self-release.yml` moves on every release, so a release is live everywhere on its next
-run: treat those names, and the check name `Home Assistant` of `validate.yml`, as a
-public contract, and break them only with a new major version.
+inputs, outputs, checks and assets. Consumers use the action from the GitHub
+Marketplace as a step, at `@v2` or `@latest`, which `self-release.yml` moves on every
+release, so a release is live everywhere on its next run: treat those names as a public
+contract, and break them only with a new major version.
 
 ## Architecture
 

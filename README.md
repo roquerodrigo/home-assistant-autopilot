@@ -20,7 +20,7 @@ The action is listed on the
 
 ### Validate
 
-Add the reusable workflow to CI:
+Add a job to CI that checks out the repository and runs the action:
 
 ```yaml
 name: CI
@@ -34,16 +34,15 @@ permissions: {}
 
 jobs:
   validate:
+    name: Home Assistant Marketplace
+    runs-on: ubuntu-latest
     permissions:
       contents: read
-    uses: roquerodrigo/home-assistant-autopilot/.github/workflows/validate.yml@v1
-```
-
-Or use the action as a step, after the checkout:
-
-```yaml
-- uses: actions/checkout@v7
-- uses: roquerodrigo/home-assistant-autopilot@v1
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: roquerodrigo/home-assistant-autopilot@v2
 ```
 
 The job summary lists every check, and each problem is annotated on the file it
@@ -70,7 +69,7 @@ jobs:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - if: steps.release.outputs.released == 'true'
-        uses: roquerodrigo/home-assistant-autopilot@v1
+        uses: roquerodrigo/home-assistant-autopilot@v2
         with:
           command: publish
           tag: ${{ steps.release.outputs.tag }}
@@ -78,11 +77,11 @@ jobs:
 
 Any release tool works the same way: pass the tag of a published release.
 
-`@v1` follows every 1.x release, and a breaking change only arrives with a new major
+`@v2` follows every 2.x release, and a breaking change only arrives with a new major
 version. `@latest` follows every release, breaking ones included. To stay on one
 version, use the tag of a
 [release](https://github.com/roquerodrigo/home-assistant-autopilot/releases), such as
-`@v1.0.0`, or its commit.
+`@v2.0.0`, or its commit.
 
 | Input        | Meaning                                                                    |
 | ------------ | -------------------------------------------------------------------------- |
