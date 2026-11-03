@@ -1,5 +1,5 @@
 name: Home Assistant Autopilot
-description: Validates integrations, dashboard cards, themes and templates for the Home Assistant Marketplace, and attaches what it installs to each release.
+description: Validates Home Assistant integrations, cards, themes and templates for the Marketplace, and attaches each release asset.
 author: roquerodrigo
 
 branding:
