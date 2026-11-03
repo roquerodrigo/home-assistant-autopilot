@@ -1,0 +1,136 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions: {}
+
+jobs:
+  lint:
+    permissions:
+      contents: read
+    uses: roquerodrigo/workflows/.github/workflows/node-lint.yml@main
+
+  tests:
+    permissions:
+      contents: read
+    uses: roquerodrigo/workflows/.github/workflows/node-test.yml@main
+
+  # Only a release pull request carries the bundle, which Release bundle commits to it.
+  # Elsewhere the job is skipped, which a required check takes as passing.
+  bundle:
+    name: Bundle is current
+    if: github.head_ref == 'release/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: roquerodrigo/workflows/actions/setup-node@main
+        with:
+          node-version: "24"
+
+      - name: Rebuild the bundle
+        run: npm run build
+
+      - name: Compare with the committed bundle
+        run: git diff --exit-code -- dist
+
+  package:
+    permissions:
+      contents: read
+    uses: roquerodrigo/workflows/.github/workflows/node-build.yml@main
+    with:
+      script: build:package
+
+  # Runs the action, built from this commit, on real repositories: the pinned images
+  # and the catalog checks only exist there.
+  end-to-end:
+    name: End to end (${{ matrix.repository }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        repository: [ha-integration-blueprint, ha-battery-card]
+    steps:
+      - name: Check out ${{ matrix.repository }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: roquerodrigo/${{ matrix.repository }}
+          persist-credentials: false
+
+      - name: Check out the action
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: .home-assistant-autopilot
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: roquerodrigo/workflows/actions/setup-node@main
+        with:
+          node-version: "24"
+          install: "false"
+
+      - name: Build the action
+        working-directory: .home-assistant-autopilot
+        run: |
+          npm ci
+          npm run build
+
+      - name: Validate
+        uses: ./.home-assistant-autopilot # zizmor: ignore[self-repository]
+        with:
+          repository: roquerodrigo/${{ matrix.repository }}
+
+  actionlint:
+    name: Actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Lint the workflows
+        uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
+        with:
+          fail-on-error: true
+
+  zizmor:
+    name: Zizmor
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+
+      - name: Audit the workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: uvx --from 'zizmor>=1,<2' zizmor --persona regular --min-severity low .

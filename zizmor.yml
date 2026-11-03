@@ -1,0 +1,10 @@
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # The composite actions in this repository are referenced by branch on
+        # purpose: consumers track `main` and so does the repository itself.
+        # Pinning them to a digest would freeze every reusable workflow against
+        # the setup steps it is meant to share.
+        roquerodrigo/*: ref-pin
+        "*": hash-pin

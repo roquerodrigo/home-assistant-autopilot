@@ -1,0 +1,49 @@
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/Sao_Paulo
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/Sao_Paulo
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    groups:
+      dependencies:
+        patterns: ["*"]
+
+  # Only hassfest publishes versioned tags. The catalog image has none, so
+  # self-images.yml follows its digest instead.
+  - package-ecosystem: docker
+    directory: /images
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/Sao_Paulo
+    ignore:
+      - dependency-name: ghcr.io/hacs/action
+    commit-message:
+      prefix: "deps"
+      include: "scope"

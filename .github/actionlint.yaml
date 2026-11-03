@@ -1,0 +1,5 @@
+paths:
+  .github/workflows/validate.yml:
+    ignore:
+      # The latest release of actionlint predates these documented properties of `job`.
+      - property "workflow_(repository|sha)" is not defined

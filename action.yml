@@ -1,0 +1,43 @@
+name: Home Assistant Autopilot
+description: Validates integrations, dashboard cards, themes and templates for the Home Assistant Marketplace, and attaches what it installs to each release.
+author: roquerodrigo
+
+branding:
+  icon: home
+  color: blue
+
+inputs:
+  command:
+    description: >-
+      validate checks the checkout in the workspace. publish attaches the release asset to
+      the release of tag.
+    required: false
+    default: validate
+  tag:
+    description: Tag of the published release that publish attaches the asset to.
+    required: false
+    default: ""
+  token:
+    description: >-
+      Token that reads the repository. publish also needs contents write access to upload
+      the asset.
+    required: true
+    default: ${{ github.token }}
+  repository:
+    description: Repository on GitHub, as owner/name.
+    required: true
+    default: ${{ github.repository }}
+
+outputs:
+  category:
+    description: What the repository installs. integration, dashboard, theme or template.
+  domain:
+    description: Domain of the integration, if it is one.
+  asset:
+    description: Name of the asset publish attached, if any.
+  asset-url:
+    description: Download URL of the asset publish attached, if any.
+
+runs:
+  using: node24
+  main: dist/index.cjs

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext",
+    "types": ["node"],
+    "verbatimModuleSyntax": true
+  },
+  "include": ["src", "tests"]
+}

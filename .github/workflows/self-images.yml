@@ -1,0 +1,56 @@
+name: Validator images
+
+# Dependabot follows the versioned tags of hassfest, but the catalog image is only
+# published as `main`, so its digest is followed here. The pull request is opened with
+# RELEASE_TOKEN so that CI runs on it.
+
+on:
+  schedule:
+    - cron: "41 11 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: validator-images
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  catalog:
+    name: Catalog image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Follow the digest of the image
+        env:
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          dockerfile=images/catalog.Dockerfile
+          image="$(sed -n 's/^FROM \([^@]*\)@.*/\1/p' "$dockerfile")"
+          current="$(sed -n 's/^FROM [^@]*@\(sha256:[0-9a-f]*\).*/\1/p' "$dockerfile")"
+          latest="$(docker buildx imagetools inspect "$image" --format '{{json .Manifest}}' | jq --raw-output .digest)"
+          if [ "$latest" = "$current" ]; then
+            echo "$image is still at $current."
+            exit 0
+          fi
+          branch="deps/catalog-image"
+          echo "FROM $image@$latest" > "$dockerfile"
+          owner="$(GH_TOKEN="$RELEASE_TOKEN" gh api user)"
+          git config user.name "$(jq --raw-output '.name // .login' <<< "$owner")"
+          git config user.email "$(jq --raw-output '"\(.id)+\(.login)@users.noreply.github.com"' <<< "$owner")"
+          git switch --create "$branch"
+          git commit --all --message "deps(images): follow the catalog image to ${latest:7:12}"
+          git push --force "https://x-access-token:${RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${branch}"
+          if [ -z "$(GH_TOKEN="$RELEASE_TOKEN" gh pr list --head "$branch" --json number --jq '.[].number')" ]; then
+            GH_TOKEN="$RELEASE_TOKEN" gh pr create --head "$branch" \
+              --title "deps(images): follow the catalog image" \
+              --body "The catalog checks image \`$image\` now resolves to \`$latest\`."
+          fi

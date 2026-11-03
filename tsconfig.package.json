@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "outDir": "lib",
+    "rewriteRelativeImportExtensions": true,
+    "rootDir": "src"
+  },
+  "include": ["src/index.ts", "src/dockerfile.d.ts"]
+}

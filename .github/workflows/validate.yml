@@ -1,0 +1,43 @@
+name: Home Assistant validation
+
+on:
+  workflow_call:
+    outputs:
+      category:
+        description: What the repository installs. integration, dashboard, theme or template.
+        value: ${{ jobs.validate.outputs.category }}
+      domain:
+        description: Domain of the integration, if it is one.
+        value: ${{ jobs.validate.outputs.domain }}
+
+permissions: {}
+
+jobs:
+  validate:
+    name: Home Assistant
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      category: ${{ steps.validate.outputs.category }}
+      domain: ${{ steps.validate.outputs.domain }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # `uses` takes no expressions, so the action comes from a checkout at the commit of
+      # this workflow. A reference to a branch would ignore the ref the caller pinned.
+      - name: Check out the action
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          path: .home-assistant-autopilot
+          persist-credentials: false
+
+      - name: Validate
+        id: validate
+        uses: ./.home-assistant-autopilot # zizmor: ignore[self-repository]

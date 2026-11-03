@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+      tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - name: Release
+        id: release
+        uses: roquerodrigo/release-autopilot@latest
+        with:
+          token: ${{ secrets.RELEASE_TOKEN }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Move the version tags
+        if: steps.release.outputs.released == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          sha="$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)"
+          for moving_tag in "${TAG%%.*}" latest; do
+            if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$moving_tag" --silent 2>/dev/null; then
+              gh api --method PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/$moving_tag" \
+                -f sha="$sha" -F force=true --silent
+            else
+              gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" \
+                -f ref="refs/tags/$moving_tag" -f sha="$sha" --silent
+            fi
+            echo "$moving_tag now points at $TAG ($sha)."
+          done
+
+  publish:
+    name: npm
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    uses: roquerodrigo/workflows/.github/workflows/publish-npm.yml@main
+    with:
+      ref: ${{ needs.release.outputs.tag }}

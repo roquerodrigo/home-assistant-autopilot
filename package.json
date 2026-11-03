@@ -1,0 +1,65 @@
+{
+  "name": "home-assistant-autopilot",
+  "version": "0.0.0",
+  "description": "Validates Home Assistant integrations, dashboard cards, themes and templates for the Home Assistant Marketplace, and attaches what it installs to each release.",
+  "keywords": [
+    "home-assistant",
+    "home-assistant-marketplace",
+    "custom-integration",
+    "lovelace",
+    "hassfest",
+    "github-actions",
+    "cli"
+  ],
+  "license": "MIT",
+  "author": "Rodrigo Roque <rodrigogoncalvesroque@gmail.com>",
+  "homepage": "https://github.com/roquerodrigo/home-assistant-autopilot#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roquerodrigo/home-assistant-autopilot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/roquerodrigo/home-assistant-autopilot/issues"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js"
+    }
+  },
+  "types": "./lib/index.d.ts",
+  "bin": {
+    "home-assistant-autopilot": "lib/bin.js"
+  },
+  "files": [
+    "lib"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "esbuild src/main.ts --bundle --minify --platform=node --target=node24 --format=cjs --loader:.Dockerfile=text --legal-comments=linked --outfile=dist/index.cjs",
+    "build:package": "rm -rf lib && esbuild src/index.ts src/bin.ts --bundle --platform=node --target=node24 --format=esm --packages=external --loader:.Dockerfile=text --outdir=lib && tsc -p tsconfig.package.json",
+    "lint": "eslint --fix",
+    "prepack": "npm run build:package",
+    "test": "tsc --noEmit && node --import ./tests/register-dockerfile.ts --test --experimental-test-coverage --test-coverage-include='src/**' --test-coverage-exclude='src/main.ts' --test-coverage-exclude='src/bin.ts' --test-coverage-lines=90 --test-coverage-branches=90 --test-coverage-functions=90 tests/*.test.ts"
+  },
+  "dependencies": {
+    "@actions/core": "^3.0.1",
+    "@octokit/rest": "^22.0.1",
+    "fflate": "^0.8.3",
+    "smol-toml": "^1.9.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@stylistic/eslint-plugin": "5.10.0",
+    "@types/node": "24.19.2",
+    "esbuild": "0.28.2",
+    "eslint": "10.8.1",
+    "eslint-plugin-perfectionist": "5.10.1",
+    "globals": "17.11.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.67.0"
+  }
+}
