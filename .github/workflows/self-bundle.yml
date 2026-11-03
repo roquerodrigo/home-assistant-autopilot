@@ -44,13 +44,13 @@ jobs:
           BRANCH: ${{ github.head_ref }}
           RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
-          if git diff --quiet -- dist; then
+          git add dist
+          if git diff --cached --quiet -- dist; then
             echo "The release already carries its bundle."
             exit 0
           fi
           owner="$(GH_TOKEN="$RELEASE_TOKEN" gh api user)"
           git config user.name "$(jq --raw-output '.name // .login' <<< "$owner")"
           git config user.email "$(jq --raw-output '"\(.id)+\(.login)@users.noreply.github.com"' <<< "$owner")"
-          git add dist
           git commit --message "build: bundle the release"
           git push "https://x-access-token:${RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${BRANCH}"

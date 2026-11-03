@@ -46,8 +46,15 @@ jobs:
       - name: Rebuild the bundle
         run: npm run build
 
+      # `git status` and not `git diff`, which misses a bundle that was never committed.
       - name: Compare with the committed bundle
-        run: git diff --exit-code -- dist
+        run: |
+          changes="$(git status --porcelain -- dist)"
+          if [ -n "$changes" ]; then
+            echo "::error::The committed bundle differs from the build:"
+            echo "$changes"
+            exit 1
+          fi
 
   package:
     permissions:
