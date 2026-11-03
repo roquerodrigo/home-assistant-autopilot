@@ -36,7 +36,12 @@ export function detectProject(
   if (manifest.contentInRoot && files.some((file) => file.path === 'manifest.json')) {
     return rootIntegrationProject(files, manifest)
   }
-  const themes = files.filter((file) => THEME_FILE.test(file.path) && directoryOf(file.path) === (manifest.contentInRoot ? '' : 'themes'))
+  const declaredBundle = manifest.filename?.endsWith('.js') ? dashboardBundleOf(files, manifest, repositoryName) : undefined
+  if (declaredBundle) {
+    return dashboardProject(files, manifest, declaredBundle)
+  }
+  const themeDirectory = manifest.contentInRoot ? '' : 'themes'
+  const themes = files.filter((file) => THEME_FILE.test(file.path) && !nameOf(file.path).startsWith('.') && directoryOf(file.path) === themeDirectory)
   if (themes.length > 1) {
     throw new InvalidProjectError(`a repository holds one theme, but there are ${themes.length}: ${themes.map((file) => file.path).join(', ')}`)
   }

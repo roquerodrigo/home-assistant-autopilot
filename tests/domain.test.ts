@@ -111,6 +111,15 @@ describe('detecting the project', () => {
     assert.equal(detect({ 'dark.yml': 'dark: {}', 'hacs.json': '{"name":"T","content_in_root":true}' }).installedFiles[0].path, 'dark.yml')
   })
 
+  it('prefers the dashboard module named in hacs.json over a YAML file at the root', () => {
+    const project = detect({ '.pre-commit-config.yaml': '', 'card.js': '', 'example.yaml': '', 'hacs.json': '{"name":"C","filename":"card.js","content_in_root":true}' })
+    assert.equal(project.category, 'dashboard')
+  })
+
+  it('ignores hidden YAML files when looking for a theme', () => {
+    assert.equal(detect({ '.yamllint.yaml': '', 'dark.yaml': '', 'hacs.json': '{"name":"T","content_in_root":true}' }).installedFiles[0].path, 'dark.yaml')
+  })
+
   it('refuses more than one theme', () => {
     assert.throws(() => detect({ 'hacs.json': '{}', 'themes/a.yaml': '', 'themes/b.yaml': '' }), /a repository holds one theme, but there are 2/)
   })

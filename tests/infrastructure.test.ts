@@ -189,15 +189,37 @@ describe('the catalog validator', () => {
       '::INFO:: <Validation archived> completed',
       '::ERROR:: <Validation topics> failed:  The repository has no valid topics (More info: https://example.test/topics )',
       '::ERROR:: <Validation brands> failed:  Not in brands',
-      '::ERROR:: Unexpected response',
+      '::ERROR:: <Theme owner/example> Repository structure is not compliant',
       '::ERROR:: <Integration owner/example> 2/3 checks failed',
     ].join('\n')))
     assert.equal(check.outcome, 'failed')
     assert.deepEqual(check.findings.map((finding) => finding.message), [
       'topics: The repository has no valid topics',
       'brands: Not in brands',
-      'Unexpected response',
+      'Repository structure is not compliant',
     ])
+  })
+
+  it('takes what it logs as warnings when every check passed', async () => {
+    const check = await validate(answered(0, [
+      '::ERROR:: \'NoneType\' object has no attribute \'items\'',
+      'Traceback (most recent call last):',
+      '::WARNING:: <Integration owner/example> The integration manifest has no categories',
+      '::INFO:: <Validation brands> completed',
+      '::INFO:: <Integration owner/example> All (1) checks passed',
+    ].join('\n')))
+    assert.equal(check.outcome, 'passed')
+    assert.equal(check.summary, '1 check passed, with 2 warnings')
+    assert.deepEqual(check.findings, [
+      { message: '\'NoneType\' object has no attribute \'items\'', severity: 'warning' },
+      { message: 'The integration manifest has no categories', severity: 'warning' },
+    ])
+  })
+
+  it('fails with the end of the output when it reports only warnings', async () => {
+    const check = await validate(answered(1, '::WARNING:: Slow\nKilled'))
+    assert.equal(check.outcome, 'failed')
+    assert.equal(check.findings[1].message, 'The catalog checks exited with 1: ::WARNING:: Slow\nKilled')
   })
 
   it('fails with the end of the output when it reports nothing', async () => {

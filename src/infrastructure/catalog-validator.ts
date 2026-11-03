@@ -23,7 +23,7 @@ const VALIDATOR_CATEGORY: Record<ProjectCategory, string> = {
 
 const COMPLETED = /<Validation (\w+)> completed/
 const FAILED = /<Validation (\w+)> failed:\s+(.*?)\s*(?:\(More info: [^)]*\))?\s*$/
-const LOGGED_ERROR = /^::(?:ERROR|CRITICAL)::\s*(.*)$/
+const LOGGED = /^::(ERROR|CRITICAL|WARNING)::\s*(?:<\w+ [^>]+>\s*)?(.*)$/
 const FAILURE_TALLY = /\d+\/\d+ checks failed$/
 
 export class CatalogValidator implements ExternalValidator {
@@ -59,8 +59,9 @@ export class CatalogValidator implements ExternalValidator {
     }
     const lines = outputLines(result.output)
     this.reporter.group(CHECK_NAMES.catalog, lines)
-    const findings: Finding[] = lines.flatMap((line) => findingOf(line) ?? [])
-    if (result.exitCode !== 0 && findings.length === 0) {
+    const passed = result.exitCode === 0
+    const findings: Finding[] = lines.flatMap((line) => findingOf(line, passed) ?? [])
+    if (!passed && !findings.some((finding) => finding.severity === 'error')) {
       findings.push({ message: `The catalog checks exited with ${result.exitCode}: ${trailingLinesOf(lines)}`, severity: 'error' })
     }
     const completed = lines.filter((line) => COMPLETED.test(line)).length
@@ -68,14 +69,14 @@ export class CatalogValidator implements ExternalValidator {
   }
 }
 
-function findingOf(line: string): Finding | undefined {
+function findingOf(line: string, passed: boolean): Finding | undefined {
   const failed = FAILED.exec(line)
   if (failed) {
     return { message: `${failed[1]}: ${failed[2]}`, severity: 'error' }
   }
-  const logged = LOGGED_ERROR.exec(line)?.[1]
-  if (logged && !FAILURE_TALLY.test(logged)) {
-    return { message: logged, severity: 'error' }
+  const [, level, message] = LOGGED.exec(line) ?? []
+  if (!message || FAILURE_TALLY.test(message)) {
+    return undefined
   }
-  return undefined
+  return { message, severity: level === 'WARNING' || passed ? 'warning' : 'error' }
 }
