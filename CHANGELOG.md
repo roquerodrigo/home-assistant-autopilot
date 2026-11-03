@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/roquerodrigo/home-assistant-autopilot/compare/v1.0.1...v1.0.2) (2026-11-03)
+
+This release fixes a publishing problem that made earlier releases unusable for every workflow that uses the action.
+
+### Bug fixes
+
+- Fixed releases 1.0.0 and 1.0.1 being published without the bundle the action runs, which made every workflow using it fail with a file-not-found error. ([#6](https://github.com/roquerodrigo/home-assistant-autopilot/pull/6))
+
 ## [1.0.1](https://github.com/roquerodrigo/home-assistant-autopilot/compare/v1.0.0...v1.0.1) (2026-11-03)
 
 ### Bug fixes
