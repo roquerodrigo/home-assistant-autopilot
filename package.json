@@ -1,6 +1,6 @@
 {
   "name": "home-assistant-autopilot",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Validates Home Assistant integrations, dashboard cards, themes and templates for the Home Assistant Marketplace, and attaches what it installs to each release.",
   "keywords": [
     "home-assistant",
