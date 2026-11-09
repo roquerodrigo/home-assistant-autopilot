@@ -1,1 +1,1 @@
-FROM ghcr.io/home-assistant/hassfest:2026.10.4@sha256:e5828f7e305518506d8b4e8346411357d68358531b761bd118fe6a1631feff44
+FROM ghcr.io/home-assistant/hassfest:2026.11.0@sha256:f9ac52cfe0f7b8770334f191e6713aa9f10f0906a989bd38d75a4933534144c7
