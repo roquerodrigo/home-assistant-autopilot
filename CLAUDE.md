@@ -7,19 +7,12 @@ Marketplace as a step, at `@v2` or `@latest`, which `self-release.yml` moves on 
 release, so a release is live everywhere on its next run: treat those names as a public
 contract, and break them only with a new major version.
 
-## Architecture
+## Layers
 
-- `src/domain`: pure rules. `hacs.json`, the integration manifest, project detection,
-  the checks, versions, release assets and the report. No I/O.
-- `src/application`: the two use cases, `ValidateProject` and `PublishReleaseAsset`,
-  behind the ports in `ports.ts`.
-- `src/infrastructure`: the adapters. Git checkout, GitHub API, zip, Docker and the two
-  external validators.
-- `src/home-assistant-autopilot.ts`: wires everything behind `HomeAssistantAutopilot`,
-  the public API of the npm package (`src/index.ts`).
-- `src/action.ts` reads the inputs of the action and `src/cli.ts` the arguments of the
-  command line, and both call `HomeAssistantAutopilot`. `src/main.ts` and `src/bin.ts`
-  only run them.
+`src/domain` does no I/O. The use cases in `src/application` reach the outside only
+through the ports in `src/application/ports.ts`, which `src/infrastructure` implements.
+`HomeAssistantAutopilot` (`src/home-assistant-autopilot.ts`) is the public API of the
+npm package; the action and the command line both go through it.
 
 ## The validators stay hidden
 
