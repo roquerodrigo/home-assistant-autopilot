@@ -32,6 +32,13 @@ updates:
     groups:
       dependencies:
         patterns: ["*"]
+    ignore:
+      # typescript-eslint does not support TypeScript 7 yet
+      - dependency-name: typescript
+        versions: [">= 7"]
+      # the action runs on node24
+      - dependency-name: "@types/node"
+        versions: [">= 25"]
 
   # Only hassfest publishes versioned tags. The catalog image has none, so
   # self-images.yml follows its digest instead.
