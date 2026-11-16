@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.2](https://github.com/roquerodrigo/home-assistant-autopilot/compare/v2.0.1...v2.0.2) (2026-11-16)
+
+### Improvements
+
+- Updated the bundled Home Assistant hassfest validator image to version 2026.11.1. ([#16](https://github.com/roquerodrigo/home-assistant-autopilot/pull/16))
+
 ## [2.0.1](https://github.com/roquerodrigo/home-assistant-autopilot/compare/v2.0.0...v2.0.1) (2026-11-11)
 
 ### Improvements
