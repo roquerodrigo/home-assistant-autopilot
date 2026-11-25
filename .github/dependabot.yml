@@ -49,6 +49,8 @@ updates:
       day: monday
       time: "09:00"
       timezone: America/Sao_Paulo
+    cooldown:
+      default-days: 7
     ignore:
       - dependency-name: ghcr.io/hacs/action
     commit-message:

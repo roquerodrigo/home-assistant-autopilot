@@ -8,3 +8,9 @@ rules:
         # the setup steps it is meant to share.
         roquerodrigo/*: ref-pin
         "*": hash-pin
+  dangerous-triggers:
+    ignore:
+      # The shared auto-assign workflow runs on pull_request_target, but it
+      # checks nothing out and only calls the issues API, so no pull request
+      # content reaches a shell.
+      - auto-assign.yml
